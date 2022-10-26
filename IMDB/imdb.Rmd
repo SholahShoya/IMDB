@@ -1,0 +1,198 @@
+---
+title: "Superstore"
+author: "Sholah"
+date: "2022-10-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+options(scipen=99)
+library(dplyr)
+library(ggplot2)
+library(shiny)
+library(shinydashboard)
+library(readr)
+library(magrittr)
+library(tidyverse)
+library(glue)
+library(plotly)
+library(scales)
+```
+
+```{r}
+imdb <- read_csv("imdb_top_1000.csv")
+```
+
+```{r}
+names(imdb)
+```
+```{r}
+imdb
+```
+
+```{r}
+imdb <- select(imdb, -c(Poster_Link, Overview))
+```
+
+```{r}
+imdb |> glimpse()
+```
+
+```{r}
+imdb_change <- imdb |> mutate(
+  Released_Year = as.integer(Released_Year),
+  Certificate = as.factor(Certificate),
+  Genre = as.factor(Genre)
+)
+```
+
+```{r}
+anyNA(imdb)
+```
+
+```{r}
+colSums(is.na(imdb))
+```
+
+```{r}
+imdb <- na.exclude(imdb)
+```
+
+```{r}
+imdb |> head(3)
+```
+
+```{r}
+imdb_genre <- 
+  imdb |> 
+  group_by(Genre) |> 
+  summarise(rating = sum(Meta_score)) |>
+  ungroup() |>
+  arrange(desc(rating)) |> 
+  top_n(30)
+```
+
+```{r}
+imdb_genre <- 
+  imdb_genre |> 
+  mutate(label = glue("Genre : {Genre}
+                      Rating : {rating}"))
+```
+
+```{r}
+ggplot(imdb_genre,
+       aes(x = rating,
+           y = reorder(Genre,rating),
+           text = label)) + 
+  geom_col(aes(fill=rating))+
+  scale_fill_gradient(low = "blue", high = "red")+
+  labs(y = "Genre")
+  
+```
+
+```{r}
+    imdb_certificate <- 
+      imdb |> 
+      group_by(Certificate) |> 
+      summarise(rating = sum(IMDB_Rating)) |>
+      ungroup() |>
+      arrange(desc(rating))
+```
+
+```{r}    
+    imdb_genre <- 
+      imdb_certificate |> 
+      mutate(label = glue("Certificate : {Certificate}
+                      Rating : {rating}"))
+```
+
+
+```{r}    
+    plot2 <- ggplot(imdb_certificate,
+                    aes(x = rating,
+                        y = reorder(Certificate,rating),
+                        text = "label")) + 
+      geom_col(aes(fill=rating))+
+      scale_fill_gradient(low = "blue", high = "red")+
+      labs(
+        title = "Movies Based on Certificate",
+        y = "Certificate")+
+      theme_minimal()+
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            legend.position = "none",
+            plot.title = element_text(hjust = 0.4))
+```
+
+
+```{r}    
+    ggplotly(plot2, tooltip = "text")
+```
+
+```{r}
+imdb_certificate <- imdb |> select(Series_Title, Genre, Certificate)
+```
+
+```{r}
+imdb_certificate
+```
+
+```{r}
+ggplot(imdb_certificate, aes(x = Certificate
+                             ))+
+  geom_bar(aes(fill=Certificate))+
+  
+  coord_polar(theta = "y")+
+  theme_minimal()+
+  theme(legend.position = "none",
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        panel.grid = element_blank(),)+
+  labs(x = NULL,
+       y = NULL)
+
+```
+
+```{r}
+imdb_certificate <- 
+  imdb_certificate |> 
+  group_by(Certificate) |> 
+  mutate(Total_vid = n())
+imdb_certificate
+```
+
+```{r}
+
+# ggplot(imdb_certificate, 
+#        aes(x = Certificate, 
+#            y = Total_vid))+
+#   geom_histogram(binwidth = 5)
+
+ggplot(imdb_certificate, aes(Certificate, Total_vid))+
+  labs(title = "Passenger Survived", 
+       x = "Certificate",
+       y = "Total Video")+
+  geom_bar(stat = "identity", aes(fill= Certificate))+
+  coord_polar("y", start=0, direction = 1)+
+  theme_void()
+  
+  
+      
+```
+```{r}
+imdb |> mutate(
+  No_of_Votes = as.numeric(No_of_Votes)
+) |> 
+arrange(imdb$No_of_Votes)
+```
+
+```{r}
+imdb_vote <- 
+  imdb |> 
+  select("Series_Title", "Genre", "IMDB_Rating", "No_of_Votes", "Certificate")
+imdb_vote
+```
+```{r}
+imdb |> dplyr::select("Series_Title", "Genre", "Certificate")
+```
+

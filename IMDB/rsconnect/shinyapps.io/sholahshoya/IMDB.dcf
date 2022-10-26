@@ -1,0 +1,13 @@
+name: IMDB
+title: IMDB
+username:
+account: sholahshoya
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7420721
+bundleId: 6441517
+url: https://sholahshoya.shinyapps.io/IMDB/
+when: 1666762526.01208
+lastSyncTime: 1666762526.01209
+asMultiple: FALSE
+asStatic: FALSE
